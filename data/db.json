@@ -1,0 +1,105 @@
+{
+  "posts": [
+    {
+      "id": 1,
+      "title": "Getting Started with Refine",
+      "status": "published",
+      "createdAt": "2025-12-01T10:00:00.000Z",
+      "content": "Intro guide to building admin panels with Refine.",
+      "category": { "id": 1 }
+    },
+    {
+      "id": 2,
+      "title": "React Router v7 Tips",
+      "status": "draft",
+      "createdAt": "2025-12-05T13:15:00.000Z",
+      "content": "How to structure routes in modern React Router.",
+      "category": { "id": 2 }
+    },
+    {
+      "id": 3,
+      "title": "Ant Design Patterns",
+      "status": "published",
+      "createdAt": "2025-12-06T09:30:00.000Z",
+      "content": "Reusable UI patterns with Ant Design components.",
+      "category": { "id": 3 }
+    },
+    {
+      "id": 4,
+      "title": "Optimizing CRUD Workflows",
+      "status": "published",
+      "createdAt": "2025-12-07T08:00:00.000Z",
+      "content": "Make data-heavy apps smooth with Refine hooks.",
+      "category": { "id": 1 }
+    },
+    {
+      "id": 5,
+      "title": "Using Simple REST",
+      "status": "draft",
+      "createdAt": "2025-12-08T11:45:00.000Z",
+      "content": "Integrate REST APIs quickly with refine simple-rest.",
+      "category": { "id": 2 }
+    },
+    {
+      "id": 6,
+      "title": "Inferencer Deep Dive",
+      "status": "published",
+      "createdAt": "2025-12-09T16:10:00.000Z",
+      "content": "Auto-generate CRUD UIs and then customize.",
+      "category": { "id": 3 }
+    },
+    {
+      "id": 7,
+      "title": "Access Control Basics",
+      "status": "published",
+      "createdAt": "2025-12-10T12:20:00.000Z",
+      "content": "Protect routes and operations cleanly.",
+      "category": { "id": 1 }
+    },
+    {
+      "id": 8,
+      "title": "State Management with Query",
+      "status": "draft",
+      "createdAt": "2025-12-11T14:55:00.000Z",
+      "content": "TanStack Query v5 patterns in Refine.",
+      "category": { "id": 2 }
+    },
+    {
+      "id": 9,
+      "title": "Styling Themes",
+      "status": "published",
+      "createdAt": "2025-12-12T18:05:00.000Z",
+      "content": "Apply RefineThemes with Ant Design.",
+      "category": { "id": 3 }
+    },
+    {
+      "id": 10,
+      "title": "Deployment Checklist",
+      "status": "published",
+      "createdAt": "2025-12-13T09:05:00.000Z",
+      "content": "Review items before shipping your admin.",
+      "category": { "id": 1 }
+    }
+  ],
+  "categories": [
+    { "id": 1, "title": "Guides" },
+    { "id": 2, "title": "Routing" },
+    { "id": 3, "title": "UI/UX" }
+  ],
+  "users": [
+    { "id": 1, "username": "admin", "email": "admin@example.com", "planType": "Enterprise", "totalUsage": 15420, "status": "active" },
+    { "id": 2, "username": "jdoe", "email": "john.doe@example.com", "planType": "Pro", "totalUsage": 4500, "status": "active" },
+    { "id": 3, "username": "smithe", "email": "smith.e@example.com", "planType": "Free", "totalUsage": 120, "status": "inactive" },
+    { "id": 4, "username": "alice_w", "email": "alice.w@example.com", "planType": "Pro", "totalUsage": 8900, "status": "active" },
+    { "id": 5, "username": "bob_b", "email": "bob.builder@example.com", "planType": "Free", "totalUsage": 50, "status": "suspended" }
+  ],
+  "usage": [
+    { "date": "2025-12-01", "count": 120 },
+    { "date": "2025-12-02", "count": 145 },
+    { "date": "2025-12-03", "count": 180 },
+    { "date": "2025-12-04", "count": 130 },
+    { "date": "2025-12-05", "count": 210 },
+    { "date": "2025-12-06", "count": 250 },
+    { "date": "2025-12-07", "count": 300 }
+  ]
+}
