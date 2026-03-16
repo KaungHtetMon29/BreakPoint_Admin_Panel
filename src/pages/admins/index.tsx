@@ -23,6 +23,7 @@ export const AdminManagementPage = () => {
     const apiUrl = useApiUrl();
     const { data: identity } = useGetIdentity<{ id?: string; email?: string }>();
     const [admins, setAdmins] = useState<AdminRecord[]>([]);
+    const [searchQuery, setSearchQuery] = useState("");
     const [isLoading, setIsLoading] = useState(true);
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [isSaving, setIsSaving] = useState(false);
@@ -133,6 +134,17 @@ export const AdminManagementPage = () => {
             message.error("Failed to delete admin account");
         }
     };
+    const filteredAdmins = admins.filter((admin) => {
+        const keyword = searchQuery.trim().toLowerCase();
+        if (!keyword) {
+            return true;
+        }
+        return (
+            admin.username.toLowerCase().includes(keyword) ||
+            admin.email.toLowerCase().includes(keyword) ||
+            admin.level.toLowerCase().includes(keyword)
+        );
+    });
 
     return (
         <Card
@@ -146,12 +158,28 @@ export const AdminManagementPage = () => {
             <Typography.Paragraph type="secondary" style={{ marginTop: -6 }}>
                 Only super admins can create, edit, and delete admin accounts.
             </Typography.Paragraph>
-            <Table<AdminRecord> rowKey="uuid" loading={isLoading} dataSource={admins}>
-                <Table.Column<AdminRecord> title="Username" dataIndex="username" />
-                <Table.Column<AdminRecord> title="Email" dataIndex="email" />
+            <Input
+                placeholder="Search by username, email, or level"
+                value={searchQuery}
+                onChange={(event) => setSearchQuery(event.target.value)}
+                allowClear
+                style={{ marginBottom: 16, maxWidth: 420 }}
+            />
+            <Table<AdminRecord> rowKey="uuid" loading={isLoading} dataSource={filteredAdmins}>
+                <Table.Column<AdminRecord>
+                    title="Username"
+                    dataIndex="username"
+                    sorter={(a, b) => a.username.localeCompare(b.username)}
+                />
+                <Table.Column<AdminRecord>
+                    title="Email"
+                    dataIndex="email"
+                    sorter={(a, b) => a.email.localeCompare(b.email)}
+                />
                 <Table.Column<AdminRecord>
                     title="Level"
                     dataIndex="level"
+                    sorter={(a, b) => a.level.localeCompare(b.level)}
                     render={(value: AdminRecord["level"]) => (
                         <Tag color={value === "super_admin" ? "gold" : "blue"}>{value}</Tag>
                     )}

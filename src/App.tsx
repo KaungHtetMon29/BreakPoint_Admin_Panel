@@ -12,6 +12,7 @@ import type { MenuProps } from "antd";
 import { DashboardOutlined, TeamOutlined, FileDoneOutlined, SafetyOutlined, LineChartOutlined, BarChartOutlined, DollarOutlined, MessageOutlined } from "@ant-design/icons";
 import { BrowserRouter, Outlet, Routes, Route, Link, Navigate, useNavigate } from "react-router";
 import { Authenticated } from "@refinedev/core";
+import { useEffect, useState } from "react";
 import { UserList } from "./pages/users/list";
 import { UserShow } from "./pages/users/show";
 import { UserEdit } from "./pages/users/edit";
@@ -24,7 +25,7 @@ import { FeedbackList } from "./pages/feedbacks/list";
 import { LoginPage } from "./pages/auth/login";
 import { AdminProfilePage } from "./pages/profile";
 import { AdminManagementPage } from "./pages/admins";
-import { authProvider } from "./providers/auth-provider";
+import { ADMIN_AUTH_STATE_EVENT, authProvider } from "./providers/auth-provider";
 import { colors } from "./theme/colors";
 import "@refinedev/antd/dist/reset.css";
 
@@ -76,11 +77,19 @@ type AdminIdentity = {
 };
 
 const getCurrentAdminLevel = () => {
-  const token = localStorage.getItem("admin_access_token");
-  if (!token) {
-    return "";
-  }
   try {
+    const identityRaw = localStorage.getItem("admin_identity_cache");
+    if (identityRaw) {
+      const identity = JSON.parse(identityRaw) as Record<string, unknown>;
+      const identityLevel = String(identity.level ?? "").trim().toLowerCase();
+      if (identityLevel) {
+        return identityLevel;
+      }
+    }
+    const token = localStorage.getItem("admin_access_token");
+    if (!token) {
+      return "";
+    }
     const payloadSegment = token.split(".")[1];
     if (!payloadSegment) {
       return "";
@@ -89,6 +98,12 @@ const getCurrentAdminLevel = () => {
     const padded = normalized.padEnd(Math.ceil(normalized.length / 4) * 4, "=");
     const decoded = atob(padded);
     const payload = JSON.parse(decoded) as Record<string, unknown>;
+    const role = String(payload.role ?? "").trim().toLowerCase();
+    const exp = Number(payload.exp ?? 0);
+    const now = Math.floor(Date.now() / 1000);
+    if (role !== "admin" || !Number.isFinite(exp) || exp <= now) {
+      return "";
+    }
     return String(payload.level ?? "").trim().toLowerCase();
   } catch {
     return "";
@@ -140,7 +155,21 @@ const AdminHeader = () => {
 };
 
 function App() {
-  const isSuperAdmin = getCurrentAdminLevel() === "super_admin";
+  const [isSuperAdmin, setIsSuperAdmin] = useState(getCurrentAdminLevel() === "super_admin");
+
+  useEffect(() => {
+    const handleAuthStateChange = () => {
+      setIsSuperAdmin(getCurrentAdminLevel() === "super_admin");
+    };
+    window.addEventListener(ADMIN_AUTH_STATE_EVENT, handleAuthStateChange);
+    window.addEventListener("storage", handleAuthStateChange);
+    handleAuthStateChange();
+    return () => {
+      window.removeEventListener(ADMIN_AUTH_STATE_EVENT, handleAuthStateChange);
+      window.removeEventListener("storage", handleAuthStateChange);
+    };
+  }, []);
+
   return (
     <BrowserRouter basename={ROUTER_BASENAME}>
       <ConfigProvider

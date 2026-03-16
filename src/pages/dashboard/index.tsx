@@ -1,7 +1,7 @@
 
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { useList } from "@refinedev/core";
-import { Card, Typography, Row, Col, Alert, Table, Tag, Statistic } from "antd";
+import { Card, Typography, Row, Col, Alert, Input, Table, Tag, Statistic } from "antd";
 
 const { Title } = Typography;
 
@@ -31,6 +31,7 @@ type PlanExpiryRisk = {
 };
 
 export const Dashboard = () => {
+  const [expirySearchQuery, setExpirySearchQuery] = useState("");
   const { result: dauResult, query: dauQuery } = useList<DailyActiveUsers>({
     resource: "admin/analytics/daily-active-users",
     pagination: { mode: "off" },
@@ -63,6 +64,20 @@ export const Dashboard = () => {
   const expiryData = useMemo(() => {
     return expiryResult.data || [];
   }, [expiryResult.data]);
+  const filteredExpiryData = useMemo(() => {
+    const keyword = expirySearchQuery.trim().toLowerCase();
+    if (!keyword) {
+      return expiryData;
+    }
+    return expiryData.filter((item) => {
+      return (
+        item.username?.toLowerCase().includes(keyword) ||
+        item.plan_type?.toLowerCase().includes(keyword) ||
+        item.risk_level?.toLowerCase().includes(keyword) ||
+        item.plan_end_date?.toLowerCase().includes(keyword)
+      );
+    });
+  }, [expiryData, expirySearchQuery]);
 
   const latestDau = dauData.length > 0 ? dauData[dauData.length - 1].active_users : 0;
   const averageUtilization = quotaData.length > 0
@@ -106,13 +121,21 @@ export const Dashboard = () => {
 
         <Col span={24}>
           <Card title="Plan Expiry Risk (Next 14 Days)" loading={expiryQuery.isLoading}>
-            <Table dataSource={expiryData} rowKey="plan_uuid" pagination={false}>
-              <Table.Column dataIndex="username" title="User" />
-              <Table.Column dataIndex="plan_type" title="Plan" />
-              <Table.Column dataIndex="plan_end_date" title="End Date" />
-              <Table.Column dataIndex="days_left" title="Days Left" />
-              <Table.Column
+            <Input
+              placeholder="Search by user, plan, risk, or end date"
+              value={expirySearchQuery}
+              onChange={(event) => setExpirySearchQuery(event.target.value)}
+              allowClear
+              style={{ marginBottom: 16, maxWidth: 420 }}
+            />
+            <Table<PlanExpiryRisk> dataSource={filteredExpiryData} rowKey="plan_uuid" pagination={false}>
+              <Table.Column<PlanExpiryRisk> dataIndex="username" title="User" sorter={(a, b) => a.username.localeCompare(b.username)} />
+              <Table.Column<PlanExpiryRisk> dataIndex="plan_type" title="Plan" sorter={(a, b) => a.plan_type.localeCompare(b.plan_type)} />
+              <Table.Column<PlanExpiryRisk> dataIndex="plan_end_date" title="End Date" sorter={(a, b) => a.plan_end_date.localeCompare(b.plan_end_date)} />
+              <Table.Column<PlanExpiryRisk> dataIndex="days_left" title="Days Left" sorter={(a, b) => a.days_left - b.days_left} />
+              <Table.Column<PlanExpiryRisk>
                 title="Risk"
+                sorter={(a, b) => a.risk_level.localeCompare(b.risk_level)}
                 render={(_, record: PlanExpiryRisk) => (
                   <Tag color={
                     record.risk_level === "expired" || record.risk_level === "high"

@@ -14,7 +14,7 @@ type MonthlyQuotaUtilization = {
 };
 
 export const MonthlyQuotaPage = () => {
-    const [emailQuery, setEmailQuery] = useState("");
+    const [searchQuery, setSearchQuery] = useState("");
     const { result, query } = useList<MonthlyQuotaUtilization>({
         resource: "admin/analytics/monthly-quota-utilization",
         pagination: { mode: "off" },
@@ -22,12 +22,12 @@ export const MonthlyQuotaPage = () => {
 
     const rows = useMemo(() => result.data ?? [], [result.data]);
     const filteredRows = useMemo(() => {
-        const keyword = emailQuery.trim().toLowerCase();
+        const keyword = searchQuery.trim().toLowerCase();
         if (!keyword) {
             return rows;
         }
-        return rows.filter((row) => row.email?.toLowerCase().includes(keyword));
-    }, [rows, emailQuery]);
+        return rows.filter((row) => row.email?.toLowerCase().includes(keyword) || row.username?.toLowerCase().includes(keyword));
+    }, [rows, searchQuery]);
 
     if (query.isError) {
         return <Alert type="error" showIcon message="Failed to load monthly quota data" description={query.error?.message} />;
@@ -40,9 +40,9 @@ export const MonthlyQuotaPage = () => {
                 Tracks current month usage against each user's active plan quota.
             </Typography.Paragraph>
             <Input
-                placeholder="Search by email"
-                value={emailQuery}
-                onChange={(event) => setEmailQuery(event.target.value)}
+                placeholder="Search by user or email"
+                value={searchQuery}
+                onChange={(event) => setSearchQuery(event.target.value)}
                 allowClear
                 style={{ marginBottom: 16, maxWidth: 360 }}
             />
@@ -56,13 +56,34 @@ export const MonthlyQuotaPage = () => {
                         pageSizeOptions: [10, 20, 50],
                     }}
                 >
-                    <Table.Column<MonthlyQuotaUtilization> dataIndex="username" title="User" />
-                    <Table.Column<MonthlyQuotaUtilization> dataIndex="email" title="Email" />
-                    <Table.Column<MonthlyQuotaUtilization> dataIndex="plan_type" title="Plan" />
-                    <Table.Column<MonthlyQuotaUtilization> dataIndex="used_count" title="Used" />
-                    <Table.Column<MonthlyQuotaUtilization> dataIndex="quota_limit" title="Limit" />
+                    <Table.Column<MonthlyQuotaUtilization>
+                        dataIndex="username"
+                        title="User"
+                        sorter={(a, b) => a.username.localeCompare(b.username)}
+                    />
+                    <Table.Column<MonthlyQuotaUtilization>
+                        dataIndex="email"
+                        title="Email"
+                        sorter={(a, b) => a.email.localeCompare(b.email)}
+                    />
+                    <Table.Column<MonthlyQuotaUtilization>
+                        dataIndex="plan_type"
+                        title="Plan"
+                        sorter={(a, b) => a.plan_type.localeCompare(b.plan_type)}
+                    />
+                    <Table.Column<MonthlyQuotaUtilization>
+                        dataIndex="used_count"
+                        title="Used"
+                        sorter={(a, b) => a.used_count - b.used_count}
+                    />
+                    <Table.Column<MonthlyQuotaUtilization>
+                        dataIndex="quota_limit"
+                        title="Limit"
+                        sorter={(a, b) => a.quota_limit - b.quota_limit}
+                    />
                     <Table.Column<MonthlyQuotaUtilization>
                         title="Utilization"
+                        sorter={(a, b) => a.utilization_percent - b.utilization_percent}
                         render={(_, record) => (
                             <Progress
                                 percent={Math.min(record.utilization_percent, 100)}

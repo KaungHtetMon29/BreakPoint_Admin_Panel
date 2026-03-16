@@ -1,6 +1,6 @@
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { useList } from "@refinedev/core";
-import { Alert, Card, Col, Empty, Row, Statistic, Table, Typography } from "antd";
+import { Alert, Card, Col, Empty, Input, Row, Statistic, Table, Typography } from "antd";
 import { Bar, BarChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 import { colors } from "../../theme/colors";
 
@@ -25,6 +25,7 @@ const formatRevenue = (amount: number) => amount.toLocaleString(undefined, {
 });
 
 export const MonthlyRevenuePage = () => {
+    const [searchQuery, setSearchQuery] = useState("");
     const { result, query } = useList<MonthlyRevenue>({
         resource: "admin/analytics/monthly-revenue",
         pagination: { mode: "off" },
@@ -32,6 +33,16 @@ export const MonthlyRevenuePage = () => {
 
     const rows = useMemo(() => result.data ?? [], [result.data]);
     const chartData = useMemo(() => rows.map((row) => ({ ...row, label: formatMonth(row.month) })), [rows]);
+    const filteredRows = useMemo(() => {
+        const keyword = searchQuery.trim().toLowerCase();
+        if (!keyword) {
+            return rows;
+        }
+        return rows.filter((row) => {
+            const monthLabel = formatMonth(row.month).toLowerCase();
+            return monthLabel.includes(keyword) || row.currency.toLowerCase().includes(keyword);
+        });
+    }, [rows, searchQuery]);
 
     const totalRevenue = useMemo(
         () => rows.reduce((sum, row) => sum + row.revenue, 0),
@@ -102,16 +113,45 @@ export const MonthlyRevenuePage = () => {
                     </div>
                 )}
             </Card>
+            <Input
+                placeholder="Search by month or currency"
+                value={searchQuery}
+                onChange={(event) => setSearchQuery(event.target.value)}
+                allowClear
+                style={{ marginBottom: 16, maxWidth: 360 }}
+            />
             <Card title="Monthly Breakdown" loading={query.isLoading}>
-                <Table dataSource={rows} rowKey="month" pagination={false}>
-                    <Table.Column<MonthlyRevenue> dataIndex="month" title="Month" render={(value: string) => formatMonth(value)} />
-                    <Table.Column<MonthlyRevenue> dataIndex="subscriptions" title="Subscriptions" />
+                <Table
+                    dataSource={filteredRows}
+                    rowKey="month"
+                    pagination={{
+                        pageSize: 10,
+                        showSizeChanger: true,
+                        pageSizeOptions: [10, 20, 50],
+                    }}
+                >
+                    <Table.Column<MonthlyRevenue>
+                        dataIndex="month"
+                        title="Month"
+                        render={(value: string) => formatMonth(value)}
+                        sorter={(a, b) => a.month.localeCompare(b.month)}
+                    />
+                    <Table.Column<MonthlyRevenue>
+                        dataIndex="subscriptions"
+                        title="Subscriptions"
+                        sorter={(a, b) => a.subscriptions - b.subscriptions}
+                    />
                     <Table.Column<MonthlyRevenue>
                         dataIndex="revenue"
                         title="Revenue"
                         render={(value: number) => `THB ${formatRevenue(value)}`}
+                        sorter={(a, b) => a.revenue - b.revenue}
                     />
-                    <Table.Column<MonthlyRevenue> dataIndex="currency" title="Currency" />
+                    <Table.Column<MonthlyRevenue>
+                        dataIndex="currency"
+                        title="Currency"
+                        sorter={(a, b) => a.currency.localeCompare(b.currency)}
+                    />
                 </Table>
             </Card>
         </div>

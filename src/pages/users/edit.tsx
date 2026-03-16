@@ -1,7 +1,7 @@
 
 import { Edit } from "@refinedev/antd";
 import { Form, Input, Select, Button, Card, Space } from "antd";
-import { useForm, useCustomMutation, useApiUrl } from "@refinedev/core";
+import { useForm, useCustomMutation } from "@refinedev/core";
 
 type StatusFormValues = {
     status: "active" | "banned";
@@ -12,7 +12,6 @@ type PasswordFormValues = {
 };
 
 export const UserEdit = () => {
-    const apiUrl = useApiUrl();
     const { query } = useForm();
     const record = query?.data?.data;
 
@@ -23,7 +22,7 @@ export const UserEdit = () => {
         if (!record?.uuid) return;
         updateStatus(
             {
-                url: `${apiUrl}/admin/users/${record.uuid}/status`,
+                url: `admin/users/${record.uuid}/status`,
                 method: "patch",
                 values: { status: values.status },
                 successNotification: () => {
@@ -41,7 +40,7 @@ export const UserEdit = () => {
         if (!record?.uuid) return;
         updatePassword(
             {
-                url: `${apiUrl}/admin/users/${record.uuid}/password`,
+                url: `admin/users/${record.uuid}/password`,
                 method: "put",
                 values: { password: values.password },
                 successNotification: () => {
