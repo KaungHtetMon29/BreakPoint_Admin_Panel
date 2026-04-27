@@ -128,7 +128,15 @@ export const Dashboard = () => {
               allowClear
               style={{ marginBottom: 16, maxWidth: 420 }}
             />
-            <Table<PlanExpiryRisk> dataSource={filteredExpiryData} rowKey="plan_uuid" pagination={false}>
+            <Table<PlanExpiryRisk>
+              dataSource={filteredExpiryData}
+              rowKey="plan_uuid"
+              pagination={{
+                pageSize: 10,
+                showSizeChanger: true,
+                pageSizeOptions: [10, 20, 50],
+              }}
+            >
               <Table.Column<PlanExpiryRisk> dataIndex="username" title="User" sorter={(a, b) => a.username.localeCompare(b.username)} />
               <Table.Column<PlanExpiryRisk> dataIndex="plan_type" title="Plan" sorter={(a, b) => a.plan_type.localeCompare(b.plan_type)} />
               <Table.Column<PlanExpiryRisk> dataIndex="plan_end_date" title="End Date" sorter={(a, b) => a.plan_end_date.localeCompare(b.plan_end_date)} />
